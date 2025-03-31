@@ -1,7 +1,7 @@
 from flask import Flask 
 app = Flask(__name__) 
   
-# Pass the required route to the decorator. 
+# Pass the required route to the decorators
 @app.route("/") 
 def hello(): 
     return "Second POC"
