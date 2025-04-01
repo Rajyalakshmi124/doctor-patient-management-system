@@ -8,6 +8,9 @@ patient_bp = Blueprint('patient', __name__)
 patient_service = PatientService()
  
 class PatientController:
+    """
+    class for handling patient related API request
+    """
     @staticmethod
     @patient_bp.route('/patient', methods=['POST'])
     def post_patient():

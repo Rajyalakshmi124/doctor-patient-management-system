@@ -7,7 +7,9 @@ class PatientRepository:
     def add_patient(self, first_name, last_name):
         
         try:
+            # Establishing database connection
             connection = self.db.connect()
+            # creating cursor for executing sql query
             cursor = connection.cursor()
  
             query = "INSERT INTO patient (first_name, last_name) VALUES (%s, %s)"

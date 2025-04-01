@@ -26,12 +26,12 @@ class PatientService:
             patient_id = self.patient_repo.add_patient(first_name, last_name)
 
             return {
-                "success": "True",
+                "success": True,
                 "id": patient_id,
                 "firstName": first_name,
                 "lastName": last_name
             }, 201
         
         except Exception as e:
-            return {"success": "False", "errors": [str(e)]}, 500
+            return {"success": False, "errors": [str(e)]}, 500
         
