@@ -1,4 +1,4 @@
-from doctor_entity.app.database.db_connection import Database
+from app.database.db_connection import Database
  
 class DoctorRepository:
     def __init__(self):

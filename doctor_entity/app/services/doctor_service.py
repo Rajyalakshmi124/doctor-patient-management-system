@@ -11,24 +11,35 @@ class DoctorService:
         """
        
         try:
-            # Extracting data from the request 
+            # Extracting data from the request JSON 
             first_name = data.get('first_name')
             last_name = data.get('last_name')
             dept_name = data.get('department')
  
             # Validations
-            errors = []
-            if not first_name or not last_name or not dept_name:
-                errors.append("First name and last name and department name are required"), 400
-           
-            if first_name and not first_name.isalpha():
-                errors.append("First name must contain only letters"), 400
-            
-            if last_name and not last_name.isalpha():
-                errors.append("Last name must contain only letters"), 400
-            
-            if dept_name and not dept_name.isalpha():
-                errors.append("Department name must contain only letters"), 400
+            errors = [] 
+            if not first_name or not first_name.strip():
+                errors.append("First name is required")
+            else:
+                first_name = first_name.strip()
+            if not all(char.isalpha() or char.isspace() for char in first_name):
+                errors.append("First name must contain only letters and spaces")
+
+            # Validates Last Name
+            if not last_name or not last_name.strip:
+                errors.append("Last name is required")
+            else:
+                last_name = last_name.strip()
+            if not all(char.isalpha() or char.isspace() for char in last_name):
+                errors.append("Last name must contain only letters and spaces")
+
+            # Validates Department Name
+            if not dept_name or not dept_name.strip:
+                errors.append("Department name are required"), 400
+            else:
+                dept_name = dept_name.strip()
+            if any(char.isdigit() for char in dept_name):
+                errors.append("Department name must contain only alphabets,spaces and special symbolls"), 400
 
             if errors:
                 return {"success": False, "errors": errors},400
@@ -37,11 +48,11 @@ class DoctorService:
             doctor_id = self.doctor_repo.add_doctor(first_name, last_name, dept_name)
             
             # Return success response with doctor details
-            return {
-                "success": True, 
-                    "doctor_id": doctor_id ,
-                    "first_name":first_name,
-                    "last_name":last_name, 
+            return { 
+                    "success": True, 
+                    "id": doctor_id ,
+                    "firstName":first_name,
+                    "lastName":last_name, 
                     "department":dept_name
             }, 201
         
