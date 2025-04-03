@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify
 from app.services.patient_sevices import PatientService
  
 # Create a Blueprint for patient routes
-patient_bp = Blueprint('patient', __name__)
- 
+patient_bp = Blueprint('patient', __name__) 
+
 # Initialize PatientService
 patient_service = PatientService()
  
@@ -26,3 +26,6 @@ class PatientController:
  
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
+
+
+    

@@ -2,36 +2,38 @@ from app.repositories.patient_repository import PatientRepository
 
 class PatientService:
     def __init__(self):
+        # Initialize the PatientRepository instance to interact with the database
         self.patient_repo = PatientRepository()
 
     def create_patient(self, data):
-        # Handles patient creation with validation.
         try:
-            # Extracting data
-            first_name = data.get('first_name')
-            last_name = data.get('last_name')
+            # Extract and strip first and last names from the input data
+            firstName = data.get('firstName', '').strip()
+            lastName = data.get('lastName', '').strip()
 
-            # Validation
+            # Initialize an empty list to collect validation errors
             errors = []
-            if not first_name or not last_name:
+            if not firstName or not lastName:
                 errors.append("First name and last name are required")
-            
-            if not first_name.isalpha() or not last_name.isalpha():
-                errors.append("First name and last name must contain only letters")
+            if not firstName.replace(' ', '').isalpha():
+                errors.append("First name must contain only letters and spaces")
+            if not lastName.replace(' ', '').isalpha():
+                errors.append("Last name must contain only letters and spaces")
 
+            # If there are validation errors, return them with a 400 status code
             if errors:
                 return {"success": False, "errors": errors}, 400
 
-            # Call repository to save patient
-            patient_id = self.patient_repo.add_patient(first_name, last_name)
+            # Add the patient to the repository and get the patient ID
+            patient_id = self.patient_repo.add_patient(firstName, lastName)
+            
+            # Return success response with patient details
+            return {"success": True, 
+                    "id": patient_id, 
+                    "firstName": firstName, 
+                    "lastName": lastName
+                    }, 201
 
-            return {
-                "success": True,
-                "id": patient_id,
-                "firstName": first_name,
-                "lastName": last_name
-            }, 201
-        
         except Exception as e:
+            # Handle unexpected errors and return a server error response
             return {"success": False, "errors": [str(e)]}, 500
-        
