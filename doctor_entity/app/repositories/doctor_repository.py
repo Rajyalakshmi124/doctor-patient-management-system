@@ -7,15 +7,15 @@ class DoctorRepository:
         """
         self.db = Database()
  
-    def add_doctor(self, first_name, last_name, dept_name):
+    def add_doctor(self, firstName, lastName, department):
        
         try:
             # Establishing database connection
             connection = self.db.connect()
             # Creating cursor to execute SQL queries
             cursor = connection.cursor()
-            query = "INSERT INTO doctor(first_name, last_name, dept_name) VALUES (%s, %s, %s)"
-            cursor.execute(query, (first_name, last_name, dept_name))
+            query = "INSERT INTO doctor(firstName, lastName, department) VALUES (%s, %s, %s)"
+            cursor.execute(query, (firstName, lastName, department))
             connection.commit()
  
             doctor_id = cursor.lastrowid
@@ -28,6 +28,36 @@ class DoctorRepository:
             return None
         
         # Ensuring that resources are properly closed after execution
+        finally:
+            cursor.close()
+            self.db.close()
+
+    def get_doctor_by_id(self, doctor_id):
+        """
+        Fetches a doctor's details from the database using their ID.
+        """
+        try:
+            connection = self.db.connect()
+            # Create a cursor object to execute SQL queries.
+            cursor = connection.cursor()
+            query = "SELECT id, firstName, lastName, department FROM doctor WHERE id = %s"
+            cursor.execute(query, (doctor_id))
+            doctor = cursor.fetchone()
+            if doctor:
+                return{
+                    "id": doctor[0],
+                    "firstName": doctor[1],
+                    "lastName": doctor[2],
+                    "department": doctor[3]
+                }
+            else:
+                return None
+        # Handling any errors that occur during thedatabase operation
+        # e is an object of Exception
+        except Exception as e:
+            print(f"Error fetching doctor: {e}")
+            return None
+        
         finally:
             cursor.close()
             self.db.close()

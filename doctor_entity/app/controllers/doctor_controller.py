@@ -20,3 +20,12 @@ class DoctorController:
         data = request.get_json()
         response, status_code = doctor_service.create_doctor(data)
         return jsonify(response), status_code
+    
+    @staticmethod
+    @doctor_bp.route('/doctor/<doctor_id>', methods=['GET'])
+    def get_doctor(doctor_id):
+        """
+        Handles the GET request to fetch a doctor by ID.
+        """
+        response, status_code = doctor_service.get_doctor_details(doctor_id)
+        return jsonify(response), status_code
