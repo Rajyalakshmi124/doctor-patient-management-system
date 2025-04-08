@@ -19,6 +19,10 @@ class PatientService:
                 errors.append("First name must contain only letters and spaces")
             if not lastName.replace(' ', '').isalpha():
                 errors.append("Last name must contain only letters and spaces")
+            
+            # Ensure no additional fields are present in the input data
+            if len(data) > 2:
+                return {"success": False, "errors": ["Only first name and last name are allowed"]}, 400
 
             # If there are validation errors, return them with a 400 status code
             if errors:
@@ -37,3 +41,26 @@ class PatientService:
         except Exception as e:
             # Handle unexpected errors and return a server error response
             return {"success": False, "errors": [str(e)]}, 500
+        
+
+    def get_patient_by_id(self, patient_id):
+        try:
+            # Fetch the patient from the repository by ID
+            patient = self.patient_repo.get_patient_by_id(patient_id)
+            if not patient:
+                return {"success": False, "errors": ["Patient not found"]}
+            
+            # Validate patient fields
+            if not patient["firstName"] or not patient["lastName"]:
+                return {"success": False, "errors": ["Patient name fields cannot be empty"]}
+            if not patient["firstName"].isalpha() or not patient["lastName"].isalpha():
+                return {"success": False, "errors": ["Patient name fields must contain only alphabetic characters"]}
+            
+            return {
+                "success": True,
+                "id": patient["id"],
+                "firstName": patient["firstName"],
+                "lastName": patient["lastName"]
+            }
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}
