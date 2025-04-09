@@ -1,4 +1,5 @@
 from app.repositories.doctor_repository import DoctorRepository
+import uuid
  
 class DoctorService:
     def __init__(self):
@@ -56,6 +57,7 @@ class DoctorService:
                     "success": True, 
                     "id": doctor_id ,
                     "firstName":firstName,
+
                     "lastName":lastName, 
                     "department":department
             }, 200
@@ -66,36 +68,29 @@ class DoctorService:
             return {"success": False,"errors": [str(e)]}, 500
         
     def get_doctor_details(self, doctor_id):
-
         try:
-            # Validate if doctor_id is a positive integer
-            if not str(doctor_id).isdigit() or int(doctor_id) <= 0:
-                return {
-                    "success": False,
-                    "errors": ["Invalid doctor ID. ID must be a positive integer."]
-                }, 400
-    
-            # Fetch doctor details
-            doctor = self.doctor_repo.get_doctor_by_id(int(doctor_id))
-            
-            if doctor:
-                return {
-                    "success": True,
-                    "id": doctor["id"],
-                    "firstName": doctor["firstName"],
-                    "lastName": doctor["lastName"],
-                    "department": doctor["department"]
-                }, 200
-            else:
-                return {
-                    "success": False,
-                    "errors": ["Doctor not found"]
-                }, 404
-            
-        # Handling any errors that occur during thedatabase operation
+            if not doctor_id or not doctor_id.strip():
+                return {"success": False, "errors": ["Doctor ID is required"]}, 400
+
+            # Validate if the doctor_id is a valid UUID
+            try:
+                uuid.UUID(doctor_id)
+            except ValueError:
+                return {"success": False, "errors": ["Invalid Doctor ID format"]}, 400
+
+            doctor = self.doctor_repo.get_doctor_by_id(doctor_id)
+            if not doctor:
+                return {"success": False, "errors": ["Doctor not found"]}, 404
+
+            return {
+                "success": True,
+                "id": doctor["id"],
+                "firstName": doctor["firstName"],
+                "lastName": doctor["lastName"],
+                "department": doctor["department"]
+            }, 200
+        
+        # Handle unexpected errors and return a server error response
         # e is an object of Exception
         except Exception as e:
-            return {
-                "success": False,
-                "errors": [str(e)]
-            }, 500
+            return {"success": False, "errors": [str(e)]}, 500
