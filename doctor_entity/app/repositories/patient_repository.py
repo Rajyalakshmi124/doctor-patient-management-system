@@ -1,3 +1,4 @@
+import uuid
 from app.database.db_connection import Database
 
 class PatientRepository:
@@ -11,14 +12,14 @@ class PatientRepository:
             connection = self.db.connect()
             # Creating cursor for executing SQL query
             cursor = connection.cursor()
+            # Generate a new UUID for the patient ID
+            patient_id = str(uuid.uuid4())
  
             # SQL query to insert a new patient
-            query = "INSERT INTO patient (first_name, last_name) VALUES (%s, %s)"
-            cursor.execute(query, (firstName, lastName))
+            query = "INSERT INTO patient (id, first_name, last_name) VALUES (%s, %s, %s)"
+            cursor.execute(query, (patient_id, firstName, lastName))
             connection.commit()
  
-            # Get the ID of the newly inserted patient
-            patient_id = cursor.lastrowid  
             return patient_id
         
         except Exception as e:

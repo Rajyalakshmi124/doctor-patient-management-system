@@ -50,12 +50,6 @@ class PatientService:
             if not patient:
                 return {"success": False, "errors": ["Patient not found"]}
             
-            # Validate patient fields
-            if not patient["firstName"] or not patient["lastName"]:
-                return {"success": False, "errors": ["Patient name fields cannot be empty"]}
-            if not patient["firstName"].isalpha() or not patient["lastName"].isalpha():
-                return {"success": False, "errors": ["Patient name fields must contain only alphabetic characters"]}
-            
             return {
                 "success": True,
                 "id": patient["id"],
