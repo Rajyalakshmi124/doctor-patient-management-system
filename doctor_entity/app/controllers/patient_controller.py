@@ -18,7 +18,6 @@ class PatientController:
         """Handles the creation of a new patient."""
         try:
             data = request.get_json()
- 
             if not data:
                 return jsonify({"success": False, "errors": ["Request body must be JSON."]}), 400
  

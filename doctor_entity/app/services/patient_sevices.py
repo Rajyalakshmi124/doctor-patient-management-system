@@ -21,8 +21,10 @@ class PatientService:
                 errors.append("Last name must contain only letters and spaces")
             
             # Ensure no additional fields are present in the input data
-            if len(data) > 2:
-                return {"success": False, "errors": ["Only first name and last name are allowed"]}, 400
+            allowed_feilds={'firstName','lastName'}
+            for fields in data.keys():
+                if fields not in allowed_feilds:
+                    return {"success": False, "errors": ["Only first name and last name are allowed"]}, 400
 
             # If there are validation errors, return them with a 400 status code
             if errors:
