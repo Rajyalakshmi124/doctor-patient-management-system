@@ -2,10 +2,8 @@ from app.database.db_connection import Database
 import uuid
 
 class DoctorRepository:
+    # Initializes the DoctorRepository class and sets up a database connection instance.
     def __init__(self):
-        """
-        Initializes the DoctorRepository class and sets up a database connection instance.
-        """
         self.db = Database()
 
     def add_doctor(self, firstName, lastName, department):
@@ -45,13 +43,13 @@ class DoctorRepository:
                     "lastName": doctor[2],
                     "department": doctor[3]
                 }
-            else:
-                return None
+            return None
             
         # e is an object of Exception
         except Exception as e:
             print(f"Error fetching doctor: {e}")
             return None
+        
         finally:
             cursor.close()
             connection.close()

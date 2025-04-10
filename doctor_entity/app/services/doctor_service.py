@@ -5,12 +5,9 @@ class DoctorService:
     def __init__(self):
         # Initialize the DoctorRepository instance to interact with database
         self.doctor_repo = DoctorRepository()
- 
+
+# Handles doctor creation with validations. 
     def create_doctor(self, data):
-        """
-        Handles doctor creation with validations.
-        """
-       
         try:
             # Extracting data from the request JSON 
             firstName = data.get('firstName')
@@ -46,8 +43,12 @@ class DoctorService:
                 return {"success": False, "errors": errors},400
             
             # Ensure no additional fields are present in the input data
-            if len(data) > 3:
-                return {"success": False, "errors": ["Only first name and last name and department are allowed"]}, 400
+            fields={"firstName", "lastName", "department"}
+            extra_fields = set(data.keys()) - fields
+            if extra_fields:
+                return {"success": False, 
+                        "errors": ["Only first name, last name, and department are allowed"]
+                }, 400
             
             # Call repository function to insert doctor into the database
             doctor_id = self.doctor_repo.add_doctor(firstName, lastName, department)
@@ -57,10 +58,9 @@ class DoctorService:
                     "success": True, 
                     "id": doctor_id ,
                     "firstName":firstName,
-
                     "lastName":lastName, 
                     "department":department
-            }, 200
+            }, 200 # As per the user perspective, 200 response represents success
         
         # Handle unexpected errors and return a server error response
         # e is an object of Exception
@@ -88,9 +88,10 @@ class DoctorService:
                 "firstName": doctor["firstName"],
                 "lastName": doctor["lastName"],
                 "department": doctor["department"]
-            }, 200
+            }, 200 # As per the user perspective, 200 response represents success
         
         # Handle unexpected errors and return a server error response
         # e is an object of Exception
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
+      
