@@ -26,6 +26,4 @@ class PatientController:
  
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
-
-
     
