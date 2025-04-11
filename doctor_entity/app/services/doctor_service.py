@@ -43,11 +43,10 @@ class DoctorService:
                 return {"success": False, "errors": errors},400
             
             # Ensure no additional fields are present in the input data
-            fields={"firstName", "lastName", "department"}
-            extra_fields = set(data.keys()) - fields
-            if extra_fields:
+            feilds=["firstName","lastName","department"]
+            if any(field not in feilds for field in data.keys()):
                 return {"success": False, 
-                        "errors": ["Only first name, last name, and department are allowed"]
+                        "errors": ["Only first name, last name and department are allowed"]
                 }, 400
             
             # Call repository function to insert doctor into the database
