@@ -21,11 +21,10 @@ class PatientService:
                 errors.append("Last name must contain only letters and spaces")
             
             # Ensure no additional fields are present in the input data
-            allowed_feilds={'firstName','lastName'}
-            for fields in data.keys():
-                if fields not in allowed_feilds:
-                    return {"success": False, "errors": ["Only first name and last name are allowed"]}, 400
-
+            allowed_feilds=['firstName','lastName']
+            if any(field not in allowed_feilds for field in data.keys()):
+                return {"success": False, "errors": ["Only first name and last name are allowed"]}, 400
+            
             # If there are validation errors, return them with a 400 status code
             if errors:
                 return {"success": False, "errors": errors}, 400
@@ -42,7 +41,7 @@ class PatientService:
 
         except Exception as e:
             # Handle unexpected errors and return a server error response
-            return {"success": False, "errors": [str(e)]}, 500
+            return {"success": False, "errors": [e]}, 500
         
 
     def get_patient_by_id(self, patient_id):
