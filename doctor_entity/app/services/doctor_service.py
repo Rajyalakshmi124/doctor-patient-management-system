@@ -94,4 +94,3 @@ class DoctorService:
         # e is an object of Exception
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
-      
