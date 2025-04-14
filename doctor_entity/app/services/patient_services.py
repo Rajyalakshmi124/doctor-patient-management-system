@@ -43,7 +43,6 @@ class PatientService:
             # Handle unexpected errors and return a server error response
             return {"success": False, "errors": [e]}, 500
         
-
     def get_patient_by_id(self, patient_id):
         try:
             # Fetch the patient from the repository by ID
@@ -59,3 +58,29 @@ class PatientService:
             }
         except Exception as e:
             return {"success": False, "errors": [str(e)]}
+        
+    def get_patient_by_name(self, name):
+        #Fetches patients by their full or partial name (first name or last name).
+        try:
+            name_parts = name.strip().split()
+ 
+            # Split the full name into first and last name (if possible)
+            if len(name_parts) == 2:
+                first_name, last_name = name_parts
+            else:
+                first_name = name_parts[0]
+                last_name = None
+ 
+            # Call repository function to fetch patients by name
+            patients = self.patient_repo.get_patient_by_name_combined(first_name, last_name)
+ 
+            if not patients:
+                return {"success": False, "errors": ["Patient not found"]}
+ 
+            return {
+                "success": True,
+                "patients": patients
+            }
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+        
