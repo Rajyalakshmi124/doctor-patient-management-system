@@ -66,38 +66,34 @@ class PatientRepository:
                 cursor.close()
             self.db.close()
 
-    def get_patient_by_name_combined(self, first_name, last_name=None):
+    def get_patient_by_name_combined(self, name, last_name=None):
         try:
             connection = self.db.connect()
             cursor = connection.cursor()
-
-            # Combined query for both cases
+    
+            search_value = f"%{name.replace(' ', '').lower()}%"
+            if last_name:
+                last_name_value = f"%{last_name.replace(' ', '').lower()}%"
+            else:
+                last_name_value = search_value 
+    
             query = """
                 SELECT id, first_name, last_name
                 FROM patient
-                WHERE (LOWER(REPLACE(first_name, ' ', '')) = LOWER(%s)
-                AND LOWER(REPLACE(last_name, ' ', '')) = LOWER(%s))
-                OR (LOWER(REPLACE(first_name, ' ', '')) = LOWER(%s)
-                OR LOWER(REPLACE(last_name, ' ', '')) = LOWER(%s))
+                WHERE LOWER(REPLACE(first_name, ' ', '')) LIKE %s
+                OR LOWER(REPLACE(last_name, ' ', '')) LIKE %s;
             """
-            if last_name:
-                cursor.execute(query, (first_name.replace(" ", "").lower(), last_name.replace(" ", "").lower(), first_name.replace(" ", "").lower(), first_name.replace(" ", "").lower()))
-            else:
-                cursor.execute(query, (first_name.replace(" ", "").lower(), '', first_name.replace(" ", "").lower(), first_name.replace(" ", "").lower()))
-
+            cursor.execute(query, (search_value, last_name_value))
             results = cursor.fetchall()
-
+    
             if results:
                 return [{"id": r[0], "firstName": r[1], "lastName": r[2]} for r in results]
             else:
                 return None
-
         except Exception as e:
             print(f"Error fetching patients by combined name: {e}")
             return None
-
         finally:
-            # Ensure cursor and connection are closed
             if cursor:
                 cursor.close()
             if connection:

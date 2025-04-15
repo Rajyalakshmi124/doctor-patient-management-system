@@ -1,6 +1,6 @@
 import uuid
 from flask import Blueprint, request, jsonify
-from doctor_entity.app.services.patient_services import PatientService
+from app.services.patient_services import PatientService
  
 # Create a Blueprint for patient routes
 patient_bp = Blueprint('patient', __name__) 
@@ -9,9 +9,7 @@ patient_bp = Blueprint('patient', __name__)
 patient_service = PatientService()
  
 class PatientController:
-    """
-    class for handling patient related API request
-    """
+    # class for handling patient related API request
     @staticmethod
     @patient_bp.route('/patient', methods=['POST'])
     def post_patient():
@@ -31,7 +29,7 @@ class PatientController:
     @staticmethod
     @patient_bp.route('/patient/<patient_id>', methods=['GET'])
     def get_patient(patient_id):
-        """Handles fetching a patient by their ID."""
+        # Handles fetching a patient by their ID.
         try:
             # Validate patient_id
             if not patient_id or not patient_id.strip():
@@ -51,7 +49,7 @@ class PatientController:
             print(f"Error fetching patient: {e}")
             return jsonify({"success": False, "errors": [str(e)]}), 500
         
-        
+
     @staticmethod
     @patient_bp.route('/patient', methods=['GET'])
     def get_patient_by_name():
