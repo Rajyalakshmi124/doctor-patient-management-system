@@ -53,3 +53,38 @@ class DoctorRepository:
         finally:
             cursor.close()
             connection.close()
+
+    #Searches for doctors by first name or last name or department matching the given name using SQL LIKE.
+    def search_doctors(self, name):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+
+            # SQL query to search doctors by first name, last name, full name, or department
+            query = """
+            SELECT id, firstName, lastName, department 
+            FROM doctor 
+            WHERE firstName LIKE %s 
+            OR lastName LIKE %s 
+            OR CONCAT(firstName, ' ', lastName) LIKE %s 
+            OR department LIKE %s
+            """
+            like_pattern = f"%{name}%"
+            cursor.execute(query, (like_pattern, like_pattern, like_pattern, like_pattern))
+            # Fetch all matching records.
+            results = cursor.fetchall()
+            doctors = []
+            for doctor in results:
+                doctors.append({
+                    "id": doctor[0],
+                    "firstName": doctor[1],
+                    "lastName": doctor[2],
+                    "department": doctor[3]
+                })
+            return doctors
+        except Exception as e:
+            print(f"Error searching doctors: {e}")
+            return None
+        finally:
+            cursor.close()
+            connection.close()

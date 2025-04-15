@@ -24,3 +24,11 @@ class DoctorController:
     def get_doctor(doctor_id):
         response, status_code = doctor_service.get_doctor_details(doctor_id)
         return jsonify(response), status_code
+    
+    @staticmethod
+    @doctor_bp.route('/doctor', methods=['GET'])
+    # Handles the GET request to search doctor by first name or last name.
+    def search_doctors():
+        name = request.args.get('name', '')
+        response, status_code = doctor_service.search_doctors_by_name(name)
+        return jsonify(response), status_code

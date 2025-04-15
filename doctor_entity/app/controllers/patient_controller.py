@@ -1,6 +1,6 @@
 import uuid
 from flask import Blueprint, request, jsonify
-from doctor_entity.app.services.patient_services import PatientService
+from app.services.patient_services import PatientService
  
 # Create a Blueprint for patient routes
 patient_bp = Blueprint('patient', __name__) 
