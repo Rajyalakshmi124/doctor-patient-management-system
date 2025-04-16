@@ -65,3 +65,36 @@ class PatientRepository:
             if 'cursor' in locals() and cursor:    
                 cursor.close()
             self.db.close()
+
+    def get_patient_by_name_combined(self, name, last_name=None):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+    
+            search_value = f"%{name.replace(' ', '').lower()}%"
+            if last_name:
+                last_name_value = f"%{last_name.replace(' ', '').lower()}%"
+            else:
+                last_name_value = search_value 
+    
+            query = """
+                SELECT id, first_name, last_name
+                FROM patient
+                WHERE LOWER(REPLACE(first_name, ' ', '')) LIKE %s
+                OR LOWER(REPLACE(last_name, ' ', '')) LIKE %s;
+            """
+            cursor.execute(query, (search_value, last_name_value))
+            results = cursor.fetchall()
+    
+            if results:
+                return [{"id": r[0], "firstName": r[1], "lastName": r[2]} for r in results]
+            else:
+                return None
+        except Exception as e:
+            print(f"Error fetching patients by combined name: {e}")
+            return None
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
