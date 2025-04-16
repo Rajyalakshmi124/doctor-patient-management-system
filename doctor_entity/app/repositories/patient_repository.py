@@ -98,4 +98,3 @@ class PatientRepository:
                 cursor.close()
             if connection:
                 connection.close()
-                

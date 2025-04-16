@@ -53,7 +53,7 @@ class PatientController:
     @staticmethod
     @patient_bp.route('/patient', methods=['GET'])
     def get_patient_by_name():
-        #Handles fetching patients by their name (first name or full name).
+        # Handles fetching patients by their name (first name or full name).
         try:
             name = request.args.get('name', '').strip()
  
@@ -61,7 +61,7 @@ class PatientController:
             if not name:
                 return jsonify({"success": False, "errors": ["Patient name is required"]}), 400
             if not all(char.isalpha() or char.isspace() for char in name):
-                return jsonify({"success": False, "errors": ["Name must contain only letters and spaces"]}), 400
+                return jsonify({"success": False, "errors": ["Name must contain only letters."]}), 400
  
             response = patient_service.get_patient_by_name(name)
             status_code = 200 if response["success"] else 404
