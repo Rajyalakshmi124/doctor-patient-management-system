@@ -118,3 +118,70 @@ class DoctorService:
             return {"success": False, 
                     "errors": [str(e)]
             }, 500
+
+    #Searches for doctors whose first name or last name or department matches the provided name.
+    def search_doctors_by_name(self, name):
+        try:
+            # Check if name parameter is missing or empty.
+            if not name or not name.strip():
+                return {"success": False, 
+                        "errors": ["Name is required"]
+                }, 400
+            # Call repository method to search doctors by name.
+            doctors = self.doctor_repo.search_doctors(name.strip())
+    
+            if not doctors:
+                return {"success": False, 
+                        "errors": ["No doctor found matching the name"]
+                }, 404
+    
+            return {"success": True, 
+                    "doctors": doctors
+            }, 200
+        # Handle any unexpected errors and return a server error.
+        except Exception as e:
+            return {"success": False, 
+                    "errors": [str(e)]
+            }, 500     
+
+    def assign_doctor_to_patient(self, data):
+        try:
+            doctorId = data.get('doctorId')
+            patientId = data.get('patientId')
+            dateOfAdmission = data.get('dateOfAdmission')
+    
+            errors = []
+
+            if not doctorId and not patientId:
+                errors.append("Both Doctor Id and Patient Id is required")
+            else:   
+                if not doctorId:
+                    errors.append("Doctor ID is required")
+                if not patientId:
+                    errors.append("Patient ID is required")
+            if not dateOfAdmission:
+                errors.append("Date of Admission is required")
+    
+            if doctorId:
+                try:
+                    uuid.UUID(doctorId)
+                except ValueError:
+                    errors.append("Invalid Doctor ID Format")
+    
+            if patientId:
+                try:
+                    uuid.UUID(patientId)
+                except ValueError:
+                    errors.append("Invalid Patient ID Format")
+           
+            if errors:
+                return {"success": False, "errors": errors}, 400
+    
+            result = self.doctor_repo.assign_doctor_to_patient(doctorId, patientId, dateOfAdmission)
+            if not result:
+                return {"success": False, "errors": ["Failed to assign doctor to patient"]}, 400
+    
+            return {"success": True}, 200
+    
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500 
