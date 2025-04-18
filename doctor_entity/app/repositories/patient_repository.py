@@ -98,3 +98,35 @@ class PatientRepository:
                 cursor.close()
             if connection:
                 connection.close()
+
+    def remove_doctor_assignment(self, doctor_id, patient_id):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+    
+            # Check if such an assignment exists and is currently assigned
+            check_query = """
+                SELECT * FROM doctorpatientassignment
+                WHERE doctor_id = %s AND patient_id = %s AND is_unassigned = FALSE
+            """
+            cursor.execute(check_query, (doctor_id, patient_id))
+            if not cursor.fetchone():
+                return False  # No match found
+    
+            # Update the is_unassigned flag to TRUE
+            update_query = """
+                UPDATE doctorpatientassignment
+                SET is_unassigned = TRUE
+                WHERE doctor_id = %s AND patient_id = %s AND is_unassigned = FALSE
+            """
+            cursor.execute(update_query, (doctor_id, patient_id))
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error unassigning doctor: {e}")
+            return False
+        finally:
+            if 'cursor' in locals() and cursor:
+                cursor.close()
+            if 'connection' in locals() and connection:
+                connection.close()
