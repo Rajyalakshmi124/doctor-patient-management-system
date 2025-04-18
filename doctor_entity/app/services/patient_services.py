@@ -75,7 +75,7 @@ class PatientService:
             patients = self.patient_repo.get_patient_by_name_combined(first_name, last_name)
  
             if not patients:
-                return {"success": False, "errors": ["Patient not found"]}
+                return {"success": False, "errors": "Patient not found"}
  
             return {
                 "success": True,
@@ -89,7 +89,7 @@ class PatientService:
             
             result = self.patient_repo.remove_doctor_assignment(doctor_id, patient_id)
             if not result:
-                return {"success": False, "errors": ["No matching assignment found"]},400
+                return {"success": False, "errors": ["No matching assignment found"]}, 400
     
             return {"success": True}, 200
     

@@ -79,10 +79,10 @@ class PatientController:
             data = request.get_json()
             doctor_id = data.get('doctorId', '').strip()
             patient_id = data.get('patientId', '').strip()
-    
+
             # Initialize errors list to store validation errors
             errors = []
-    
+
             # Validate if both doctor_id and patient_id are empty
             if not doctor_id and not patient_id:
                 errors.append("Both Doctor ID and Patient ID are required")
@@ -91,30 +91,26 @@ class PatientController:
                     errors.append("Doctor ID is required")
                 if not patient_id:
                     errors.append("Patient ID is required")
-    
-            # If there are errors, return them
-            if errors:
-                return jsonify({"success": False, "errors": errors}), 400
-    
+
             # Validate UUID format for doctor_id
             try:
                 uuid.UUID(doctor_id)
             except ValueError:
                 errors.append("Invalid doctorId format")
-    
+
             # Validate UUID format for patient_id
             try:
                 uuid.UUID(patient_id)
             except ValueError:
                 errors.append("Invalid patientId format")
-    
-            # If there are errors in UUID validation, return them
+
+            # If there are errors, return them
             if errors:
                 return jsonify({"success": False, "errors": errors}), 400
-    
+
             # Call service method to unassign the doctor
             response, status_code = patient_service.unassign_doctor_from_patient(doctor_id, patient_id)
-    
+
             return jsonify(response), status_code
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
