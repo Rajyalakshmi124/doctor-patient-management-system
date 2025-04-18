@@ -88,3 +88,27 @@ class DoctorRepository:
         finally:
             cursor.close()
             connection.close()
+
+    # Assigns a doctor to a patient in the database.
+    def assign_doctor_to_patient(self, doctorId, patientId, dateOfAdmission):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+            # Generate a UUID for doctor-patient assignment
+            assign_id= str(uuid.uuid4())
+            query = """
+                INSERT INTO doctorpatientassignment (id,doctorId, patientId, dateOfAdmission)
+                VALUES (%s, %s, %s, %s)
+            """
+            # Execute the insert query with provided values.
+            cursor.execute(query, (assign_id, doctorId, patientId, dateOfAdmission))
+            connection.commit()
+            return True
+ 
+        except Exception as e:
+            print(f"Error assigning doctor to patient: {e}")
+            return False
+ 
+        finally:
+            cursor.close()
+            connection.close()

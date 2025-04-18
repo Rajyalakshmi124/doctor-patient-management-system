@@ -1,10 +1,19 @@
 from app.repositories.doctor_repository import DoctorRepository
 import uuid
+from datetime import datetime
  
 class DoctorService:
     def __init__(self):
         # Initialize the DoctorRepository instance to interact with database
         self.doctor_repo = DoctorRepository()
+
+    # Reusable method to validate UUID format.
+    def _valid_uuid(self, value):
+        try:
+            uuid.UUID(value)
+            return True
+        except ValueError:
+            return False
 
 # Handles doctor creation with validations. 
     def create_doctor(self, data):
@@ -72,10 +81,8 @@ class DoctorService:
                 return {"success": False, "errors": ["Doctor ID is required"]}, 400
 
             # Validate if the doctor_id is a valid UUID
-            try:
-                uuid.UUID(doctor_id)
-            except ValueError:
-                return {"success": False, "errors": ["Invalid Doctor ID format"]}, 400
+            if not self._valid_uuid(doctor_id):
+                return{"success":False, "error":["Invalid Doctor ID format"]}, 400
 
             doctor = self.doctor_repo.get_doctor_by_id(doctor_id)
             if not doctor:
@@ -118,3 +125,73 @@ class DoctorService:
             return {"success": False, 
                     "errors": [str(e)]
             }, 500
+
+    #Searches for doctors whose first name or last name or department matches the provided name.
+    def search_doctors_by_name(self, name):
+        try:
+            # Check if name parameter is missing or empty.
+            if not name or not name.strip():
+                return {"success": False, 
+                        "errors": ["Name is required"]
+                }, 400
+            # Call repository method to search doctors by name.
+            doctors = self.doctor_repo.search_doctors(name.strip())
+    
+            if not doctors:
+                return {"success": False, 
+                        "errors": ["No doctor found matching the name"]
+                }, 404
+    
+            return {"success": True, 
+                    "doctors": doctors
+            }, 200
+        # Handle any unexpected errors and return a server error.
+        except Exception as e:
+            return {"success": False, 
+                    "errors": [str(e)]
+            }, 500     
+
+    def assign_doctor_to_patient(self, data):
+        try:
+            # Extracting data from the input dictionary
+            doctorId = data.get('doctorId')
+            patientId = data.get('patientId')
+            dateOfAdmission = data.get('dateOfAdmission')
+    
+            errors = []
+            # Validate doctorId
+            if not doctorId:
+                errors.append("Doctor ID is required")
+            elif not self._valid_uuid(doctorId):
+                errors.append("Invalid Doctor ID format")
+
+            # Validate patientId
+            if not patientId:
+                errors.append("Patient ID is required")
+            elif not self._valid_uuid(patientId):
+                errors.append("Invalid Patient ID format")
+
+            # Validate dateOfAdmission 
+            if not dateOfAdmission:
+                errors.append("Date of Admission is required")
+            else:
+                try:
+                    # Check if dateOfAdmission is in the correct format
+                    datetime.strptime(dateOfAdmission, '%Y-%m-%d')
+                except ValueError:
+                    errors.append("Date of Admission must be in YYYY-MM-DD format")
+    
+            if errors:
+                return {"success": False, "errors": errors}, 400
+    
+            result = self.doctor_repo.assign_doctor_to_patient(doctorId, patientId, dateOfAdmission)
+    
+            if not result:
+                return {"success": False, "errors": ["Failed to assign doctor to patient"]}, 400
+    
+            return {"success": True}, 200
+        
+        # Handle unexpected errors and return a server error response
+        # e is an object of Exception
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500

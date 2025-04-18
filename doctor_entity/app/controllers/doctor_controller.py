@@ -32,3 +32,11 @@ class DoctorController:
         name = request.args.get('name', '')
         response, status_code = doctor_service.search_doctors_by_name(name)
         return jsonify(response), status_code
+    
+    @staticmethod
+    @doctor_bp.route('/AssignDoctorToPatient', methods=['POST'])
+    def assign_doctor_to_patient():
+    # Handles the POST request to assign a doctor to a patient
+        data = request.get_json()
+        response,status_code = doctor_service.assign_doctor_to_patient(data)
+        return jsonify(response), status_code

@@ -16,7 +16,7 @@ class PatientRepository:
             patient_id = str(uuid.uuid4())
  
             # SQL query to insert a new patient
-            query = "INSERT INTO patient (id, first_name, last_name) VALUES (%s, %s, %s)"
+            query = "INSERT INTO patient (id, firstName, lastName) VALUES (%s, %s, %s)"
             cursor.execute(query, (patient_id, firstName, lastName))
             connection.commit()
  
@@ -41,7 +41,7 @@ class PatientRepository:
             cursor = connection.cursor()
 
             # SQL query to fetch a patient by ID
-            query = "SELECT id, first_name, last_name FROM patient WHERE id = %s"
+            query = "SELECT id, firstName, lastName FROM patient WHERE id = %s"
             cursor.execute(query, (patient_id,))
             patient = cursor.fetchone()
 
@@ -78,10 +78,10 @@ class PatientRepository:
                 last_name_value = search_value 
     
             query = """
-                SELECT id, first_name, last_name
+                SELECT id, firstName, lastName
                 FROM patient
-                WHERE LOWER(REPLACE(first_name, ' ', '')) LIKE %s
-                OR LOWER(REPLACE(last_name, ' ', '')) LIKE %s;
+                WHERE LOWER(REPLACE(firstName, ' ', '')) LIKE %s
+                OR LOWER(REPLACE(lastName, ' ', '')) LIKE %s;
             """
             cursor.execute(query, (search_value, last_name_value))
             results = cursor.fetchall()
