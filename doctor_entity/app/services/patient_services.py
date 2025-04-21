@@ -76,10 +76,23 @@ class PatientService:
  
             if not patients:
                 return {"success": False, "errors": ["Patient not found"]}
+
  
             return {
                 "success": True,
                 "patients": patients
             }
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+
+    def unassign_doctor_from_patient(self, doctor_id, patient_id):
+        try:
+            
+            result = self.patient_repo.remove_doctor_assignment(doctor_id, patient_id)
+            if not result:
+                return {"success": False, "errors": ["No matching assignment found"]}, 400
+    
+            return {"success": True}, 200
+    
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
