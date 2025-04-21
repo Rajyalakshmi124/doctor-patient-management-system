@@ -114,3 +114,22 @@ class PatientController:
             return jsonify(response), status_code
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
+
+    
+    @staticmethod
+    @patient_bp.route('/patientsByDoctorId', methods=['GET'])
+    def get_patients_by_doctor_id():
+        try:
+            doctor_id = request.args.get('doctorId', '').strip()
+            if not doctor_id:
+                return jsonify({"success": False, "errors": ["DoctorId is required"]}), 400
+    
+            try:
+                uuid.UUID(doctor_id)
+            except ValueError:
+                return jsonify({"success": False, "errors": ["Invalid doctorId format"]}), 400
+    
+            response, status_code = patient_service.get_patients_by_doctor_id(doctor_id)
+            return jsonify(response), status_code
+        except Exception as e:
+            return jsonify({"success": False, "errors": [str(e)]}), 500

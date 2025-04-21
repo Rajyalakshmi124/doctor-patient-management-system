@@ -126,31 +126,6 @@ class DoctorService:
                     "errors": [str(e)]
             }, 500
 
-    #Searches for doctors whose first name or last name or department matches the provided name.
-    def search_doctors_by_name(self, name):
-        try:
-            # Check if name parameter is missing or empty.
-            if not name or not name.strip():
-                return {"success": False, 
-                        "errors": ["Name is required"]
-                }, 400
-            # Call repository method to search doctors by name.
-            doctors = self.doctor_repo.search_doctors(name.strip())
-    
-            if not doctors:
-                return {"success": False, 
-                        "errors": ["No doctor found matching the name"]
-                }, 404
-    
-            return {"success": True, 
-                    "doctors": doctors
-            }, 200
-        # Handle any unexpected errors and return a server error.
-        except Exception as e:
-            return {"success": False, 
-                    "errors": [str(e)]
-            }, 500     
-
     def assign_doctor_to_patient(self, data):
         try:
             # Extracting data from the input dictionary
