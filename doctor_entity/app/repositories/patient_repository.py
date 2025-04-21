@@ -137,7 +137,7 @@ class PatientRepository:
             cursor = connection.cursor()
 
             query = """
-            SELECT d.id, d.firstName, d.lastName, d.department, p.id, p.first_name, p.last_name, a.date_of_admission
+            SELECT d.id, d.firstName, d.lastName, d.department, p.id, p.firstName, p.lastName, a.date_of_admission
             FROM doctor d
             JOIN doctorpatientassignment a ON d.id = a.doctor_id
             JOIN patient p ON p.id = a.patient_id
