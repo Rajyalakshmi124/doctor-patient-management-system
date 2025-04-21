@@ -125,32 +125,7 @@ class DoctorService:
             return {"success": False, 
                     "errors": [str(e)]
             }, 500
-
-    #Searches for doctors whose first name or last name or department matches the provided name.
-    def search_doctors_by_name(self, name):
-        try:
-            # Check if name parameter is missing or empty.
-            if not name or not name.strip():
-                return {"success": False, 
-                        "errors": ["Name is required"]
-                }, 400
-            # Call repository method to search doctors by name.
-            doctors = self.doctor_repo.search_doctors(name.strip())
-    
-            if not doctors:
-                return {"success": False, 
-                        "errors": ["No doctor found matching the name"]
-                }, 404
-    
-            return {"success": True, 
-                    "doctors": doctors
-            }, 200
-        # Handle any unexpected errors and return a server error.
-        except Exception as e:
-            return {"success": False, 
-                    "errors": [str(e)]
-            }, 500     
-
+  
     def assign_doctor_to_patient(self, data):
         try:
             # Extracting data from the input dictionary
@@ -193,5 +168,28 @@ class DoctorService:
         
         # Handle unexpected errors and return a server error response
         # e is an object of Exception
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+        
+        
+    def get_assigned_doctors_by_patient(self, patient_id):
+        try:
+            # Validations.
+            if not patient_id or not patient_id.strip():
+                return {"success": False, "errors": ["Patient ID is required"]}, 400
+    
+            if not self._valid_uuid(patient_id):
+                return {"success": False, "errors": ["Invalid Patient ID format"]}, 400
+    
+            # Call repository to get the doctor-patient assignment list.
+            doctor_data = self.doctor_repo.get_assigned_doctors_by_patient(patient_id)
+    
+            if not doctor_data:
+                return {"success": False, "errors": ["No doctor assigned to this patient"]}, 404
+    
+            return {"success": True, "data":doctor_data}, 200
+        
+        # Handle unexpected errors and return a server error response.
+        # e is an object of Exception.
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500

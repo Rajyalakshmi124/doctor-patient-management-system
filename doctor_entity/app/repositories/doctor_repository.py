@@ -112,3 +112,47 @@ class DoctorRepository:
         finally:
             cursor.close()
             connection.close()
+ 
+    def get_assigned_doctors_by_patient(self, patient_id):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+
+            # SQL query to get all doctors assigned to the given patient
+            query = """
+                SELECT d.id, d.firstName, d.lastName, d.department, dp.dateOfAdmission
+                FROM doctorpatientassignment dp
+                JOIN doctor d ON dp.doctorId = d.id
+                WHERE dp.patientId = %s
+            """
+            # Execute the query with patient_id as parameter
+            cursor.execute(query, (patient_id,))
+            rows = cursor.fetchall()
+
+            if not rows:
+                return None
+
+            # Prepare the response list of doctors.
+            doctors = []
+            for row in rows:
+                doctors.append({
+                    "id": row[0],
+                    "firstName": row[1],
+                    "lastName": row[2],
+                    "department": row[3],
+                    "dateOfAdmission": row[4].strftime('%Y-%m-%d') if row[4] else None
+                })
+
+            # Return the patient and their assigned doctors
+            return {
+                "doctors": doctors
+            }
+
+        except Exception as e:
+            print(f"Error fetching assigned doctors: {e}")
+            return None
+
+        finally:
+            cursor.close()
+            connection.close()
+            
