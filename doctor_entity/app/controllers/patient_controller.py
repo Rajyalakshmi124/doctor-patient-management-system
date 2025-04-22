@@ -128,3 +128,25 @@ class PatientController:
             return jsonify(response), status_code
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
+
+    # PATCH /patient/{patientId} - Update patient details
+    @staticmethod
+    @patient_bp.route('/patient/<patient_id>', methods=['PATCH'])
+    def update_patient(patient_id):
+        # Handles updating patient details.
+        try:
+            # Validate patient_id format
+            if not doctor_service._valid_uuid(patient_id):
+                return{"success":False, "error":["Invalid Patient ID format"]}, 400
+ 
+            # Get data from request
+            data = request.get_json()
+ 
+            if not data:
+                return jsonify({"success": False, "errors": ["Request body must be JSON."]}), 400
+ 
+            # Call service method to update patient details
+            response, status_code = patient_service.update_patient_by_id(patient_id, data)
+            return jsonify(response), status_code
+        except Exception as e:
+            return jsonify({"success": False, "errors": [str(e)]}), 500
