@@ -40,3 +40,11 @@ class DoctorController:
         data = request.get_json()
         response,status_code = doctor_service.assign_doctor_to_patient(data)
         return jsonify(response), status_code
+
+    @staticmethod
+    @doctor_bp.route('/AssignedDoctorByPatientId', methods=['GET'])
+    def get_assigned_doctors_by_patient():
+        # Extract patient ID from query parameters
+        patient_id = request.args.get('patientId')
+        response, status_code = doctor_service.get_assigned_doctors_by_patient(patient_id)
+        return jsonify(response), status_code
