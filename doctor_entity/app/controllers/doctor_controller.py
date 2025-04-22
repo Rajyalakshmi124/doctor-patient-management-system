@@ -48,3 +48,9 @@ class DoctorController:
         patient_id = request.args.get('patientId')
         response, status_code = doctor_service.get_assigned_doctors_by_patient(patient_id)
         return jsonify(response), status_code
+
+    @staticmethod
+    @doctor_bp.route('/doctors/<doctor_id>', methods=['DELETE'])
+    def delete_doctor(doctor_id):
+        response, status_code = doctor_service.delete_doctor(doctor_id)
+        return jsonify(response), status_code
