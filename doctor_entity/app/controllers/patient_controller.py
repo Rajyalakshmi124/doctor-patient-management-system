@@ -1,23 +1,15 @@
-import uuid
 from flask import Blueprint, request, jsonify
 from app.services.patient_services import PatientService
- 
+from app.services.doctor_service import DoctorService
+
 # Create a Blueprint for patient routes
 patient_bp = Blueprint('patient', __name__) 
 
 # Initialize PatientService
 patient_service = PatientService()
+doctor_service = DoctorService()
  
 class PatientController:
-
-    # Reusable method to validate UUID format.
-    @staticmethod
-    def _valid_uuid(value):
-        try:
-            uuid.UUID(value)
-            return True
-        except ValueError:
-            return False
 
     # class for handling patient related API request
     @staticmethod
@@ -46,7 +38,7 @@ class PatientController:
                 return jsonify({"success": False, "errors": ["Patient ID is required"]}), 400
             
             # Validate if the patient_id is a valid UUID
-            if not PatientController._valid_uuid(patient_id):
+            if not doctor_service._valid_uuid(patient_id):
                 return{"success":False, "error":["Invalid Patient ID format"]}, 400
 
             response = patient_service.get_patient_by_id(patient_id)
@@ -100,17 +92,17 @@ class PatientController:
                 if not patient_id:
                     errors.append("Patient ID is required")
 
-            # Validate if the doctor_id is a valid UUID
-            if not PatientController._valid_uuid(doctor_id):
-                return{"success":False, "error":["Invalid Doctor ID format"]}, 400
-
-            # Validate if the patient_id is a valid UUID
-            if not PatientController._valid_uuid(patient_id):
-                return{"success":False, "error":["Invalid Patient ID format"]}, 400
-
             # If there are errors, return them
             if errors:
                 return jsonify({"success": False, "errors": errors}), 400
+
+            # Validate if the doctor_id is a valid UUID
+            if not doctor_service._valid_uuid(doctor_id):
+                return{"success":False, "error":["Invalid Doctor ID format"]}, 400
+
+            # Validate if the patient_id is a valid UUID
+            if not doctor_service._valid_uuid(patient_id):
+                return{"success":False, "error":["Invalid Patient ID format"]}, 400
 
             # Call service method to unassign the doctor
             response, status_code = patient_service.unassign_doctor_from_patient(doctor_id, patient_id)
@@ -129,7 +121,7 @@ class PatientController:
                 return jsonify({"success": False, "errors": ["DoctorId is required"]}), 400
     
             # Validate if the doctor_id is a valid UUID
-            if not PatientController._valid_uuid(doctor_id):
+            if not doctor_service._valid_uuid(doctor_id):
                 return{"success":False, "error":["Invalid Doctor ID format"]}, 400
     
             response, status_code = patient_service.get_patients_by_doctor_id(doctor_id)
