@@ -108,3 +108,15 @@ class PatientService:
         
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
+
+    def delete_patient_by_id(self, patient_id):
+        try:
+            # Call repository method - handles both check and deletion
+            self.patient_repo.delete_patient(patient_id)
+            if not patient_id:
+                return {"success": False, "errors": ["Patient not found"]}
+            
+            return {"success": True, "message": "Patient deleted successfully."}, 200
+        
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500

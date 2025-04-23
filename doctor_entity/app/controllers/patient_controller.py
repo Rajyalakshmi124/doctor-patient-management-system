@@ -1,14 +1,16 @@
-import uuid
 from flask import Blueprint, request, jsonify
 from app.services.patient_services import PatientService
- 
+from app.services.doctor_service import DoctorService
+
 # Create a Blueprint for patient routes
 patient_bp = Blueprint('patient', __name__) 
 
 # Initialize PatientService
 patient_service = PatientService()
+doctor_service = DoctorService()
  
 class PatientController:
+
     # class for handling patient related API request
     @staticmethod
     @patient_bp.route('/patient', methods=['POST'])
@@ -35,11 +37,9 @@ class PatientController:
             if not patient_id or not patient_id.strip():
                 return jsonify({"success": False, "errors": ["Patient ID is required"]}), 400
             
-            # Check if patient_id is a valid UUID
-            try:
-                uuid.UUID(patient_id)
-            except ValueError:
-                return jsonify({"success": False, "errors": ["Invalid Patient ID format"]}), 400
+            # Validate if the patient_id is a valid UUID
+            if not doctor_service._valid_uuid(patient_id):
+                return{"success":False, "error":["Invalid Patient ID format"]}, 400
 
             response = patient_service.get_patient_by_id(patient_id)
             status_code = 200 if response["success"] else 404
@@ -92,21 +92,17 @@ class PatientController:
                 if not patient_id:
                     errors.append("Patient ID is required")
 
-            # Validate UUID format for doctor_id
-            try:
-                uuid.UUID(doctor_id)
-            except ValueError:
-                errors.append("Invalid doctorId format")
-
-            # Validate UUID format for patient_id
-            try:
-                uuid.UUID(patient_id)
-            except ValueError:
-                errors.append("Invalid patientId format")
-
             # If there are errors, return them
             if errors:
                 return jsonify({"success": False, "errors": errors}), 400
+
+            # Validate if the doctor_id is a valid UUID
+            if not doctor_service._valid_uuid(doctor_id):
+                return{"success":False, "error":["Invalid Doctor ID format"]}, 400
+
+            # Validate if the patient_id is a valid UUID
+            if not doctor_service._valid_uuid(patient_id):
+                return{"success":False, "error":["Invalid Patient ID format"]}, 400
 
             # Call service method to unassign the doctor
             response, status_code = patient_service.unassign_doctor_from_patient(doctor_id, patient_id)
@@ -152,5 +148,22 @@ class PatientController:
             # Call service method to update patient details
             response, status_code = patient_service.update_patient_by_id(patient_id, data)
             return jsonify(response), status_code
+        except Exception as e:
+            return jsonify({"success": False, "errors": [str(e)]}), 500
+
+    # DELETE /patient/{patientId} - Delete patient
+    @staticmethod
+    @patient_bp.route('/patient/<patient_id>', methods=['DELETE'])
+    def delete_patient(patient_id):
+        # Handles deleting a patient.
+        try:
+            # Validate patient_id format
+            if not doctor_service._valid_uuid(patient_id):
+                return{"success":False, "error":["Invalid Patient ID format"]}, 400
+    
+            # Call service method to check and delete the patient
+            response, status_code = patient_service.delete_patient(patient_id)
+            return jsonify(response), status_code
+    
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500

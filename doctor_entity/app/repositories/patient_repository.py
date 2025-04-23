@@ -172,3 +172,32 @@ class PatientRepository:
                 cursor.close()
             if connection:
                 connection.close()
+
+    def delete_patient(self, patient_id):
+        connection = self.db.connect()
+        cursor = connection.cursor()
+        try:
+            # Check if the patient is assigned to a doctor
+            check_query = """
+            SELECT * FROM doctorpatientassignment
+            WHERE patient_id = %s AND is_unassigned = FALSE
+            """
+            cursor.execute(check_query, (patient_id,))
+            assignment = cursor.fetchone()
+
+            if assignment:
+                raise ValueError("Patient is assigned to a doctor and cannot be deleted.")
+
+            # If not assigned, delete the patient
+            delete_query = "DELETE FROM patient WHERE id = %s"
+            cursor.execute(delete_query, (patient_id,))
+            connection.commit()
+
+            return True
+        except Exception as e:
+            raise e
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
