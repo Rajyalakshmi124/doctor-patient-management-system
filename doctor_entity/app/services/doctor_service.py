@@ -171,7 +171,6 @@ class DoctorService:
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
         
-        
     def get_assigned_doctors_by_patient(self, patient_id):
         try:
             # Validations.
@@ -194,7 +193,34 @@ class DoctorService:
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
         
-
+    def delete_doctor(self, doctor_id):
+        try:
+            # Validate input
+            if not doctor_id or not doctor_id.strip():
+                return {"success": False, "errors": ["Doctor ID is required"]}, 400
+ 
+            if not self._valid_uuid(doctor_id):
+                return {"success": False, "errors": ["Invalid Doctor ID format"]}, 400
+ 
+            # Delete doctor if not assigned
+            result = self.doctor_repo.delete_doctor_if_unassigned(doctor_id)
+ 
+            if result["success"]:
+                return {"success": True, "message": "Doctor deleted successfully"}, 200
+ 
+            delete_status = result.get("delete_status")
+            if delete_status == "assigned":
+                return {"success": False, "errors": ["Doctor is assigned to a patient and cannot be deleted"]}, 400
+            elif delete_status == "not_found_or_failed":
+                return {"success": False, "errors": ["Failed to delete doctor"]}, 500
+            elif delete_status == "exception":
+                return {"success": False, "errors": [result.get("error", "Unknown error")]}, 500
+            else:
+                return {"success": False, "errors": ["Unexpected error occurred"]}, 500
+ 
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+        
     def update_doctor(self, doctor_id, data):
         try:
             # Validate doctor_id

@@ -156,6 +156,36 @@ class DoctorRepository:
             cursor.close()
             connection.close()
 
+    def delete_doctor_if_unassigned(self, doctor_id):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+ 
+            # Check if the doctor is assigned to any patients.
+            check_query = "SELECT COUNT(*) FROM doctorpatientassignment WHERE doctorId = %s"
+            cursor.execute(check_query, (doctor_id,))
+            count = cursor.fetchone()[0]
+
+            if count > 0:
+                return {"success": False, "delete_status": "assigned"}
+ 
+            # Delete is unassigned it it proceed with deletion.
+            delete_query = "DELETE FROM doctor WHERE id = %s"
+            cursor.execute(delete_query, (doctor_id,))
+            connection.commit()
+ 
+            if cursor.rowcount > 0:
+                return {"success": True}
+            else:
+                return {"success": False, "delete_status": "not_found_or_failed"}
+ 
+        except Exception as e:
+            print(f"Error deleting doctor: {e}")
+            return {"success": False, "delete_status": "exception", "error": str(e)}
+        finally:
+                cursor.close()
+                connection.close() 
+
     def update_doctor(self, doctor_id, firstName, lastName, department):
         try:
             connection = self.db.connect()
@@ -192,4 +222,3 @@ class DoctorRepository:
         finally:
             cursor.close()
             connection.close()
-       
