@@ -34,9 +34,23 @@ class DoctorController:
         return jsonify(response), status_code
     
     @staticmethod
-    @doctor_bp.route('/AssignDoctorToPatient', methods=['POST'])
+    @doctor_bp.route('/assignDoctorToPatient', methods=['POST'])
     def assign_doctor_to_patient():
     # Handles the POST request to assign a doctor to a patient
         data = request.get_json()
         response,status_code = doctor_service.assign_doctor_to_patient(data)
+        return jsonify(response), status_code
+
+    @staticmethod
+    @doctor_bp.route('/assignedDoctorByPatientId', methods=['GET'])
+    def get_assigned_doctors_by_patient():
+        # Extract patient ID from query parameters
+        patient_id = request.args.get('patientId')
+        response, status_code = doctor_service.get_assigned_doctors_by_patient(patient_id)
+        return jsonify(response), status_code
+
+    @staticmethod
+    @doctor_bp.route('/doctor/<doctor_id>', methods=['DELETE'])
+    def delete_doctor(doctor_id):
+        response, status_code = doctor_service.delete_doctor(doctor_id)
         return jsonify(response), status_code

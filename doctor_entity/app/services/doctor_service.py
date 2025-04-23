@@ -125,7 +125,7 @@ class DoctorService:
             return {"success": False, 
                     "errors": [str(e)]
             }, 500
-
+  
     def assign_doctor_to_patient(self, data):
         try:
             # Extracting data from the input dictionary
@@ -168,5 +168,55 @@ class DoctorService:
         
         # Handle unexpected errors and return a server error response
         # e is an object of Exception
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+        
+    def get_assigned_doctors_by_patient(self, patient_id):
+        try:
+            # Validations.
+            if not patient_id or not patient_id.strip():
+                return {"success": False, "errors": ["Patient ID is required"]}, 400
+    
+            if not self._valid_uuid(patient_id):
+                return {"success": False, "errors": ["Invalid Patient ID format"]}, 400
+    
+            # Call repository to get the doctor-patient assignment list.
+            doctor_data = self.doctor_repo.get_assigned_doctors_by_patient(patient_id)
+    
+            if not doctor_data:
+                return {"success": False, "errors": ["No doctor assigned to this patient"]}, 404
+    
+            return {"success": True, "data":doctor_data}, 200
+        
+        # Handle unexpected errors and return a server error response.
+        # e is an object of Exception.
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+        
+    def delete_doctor(self, doctor_id):
+        try:
+            # Validate input
+            if not doctor_id or not doctor_id.strip():
+                return {"success": False, "errors": ["Doctor ID is required"]}, 400
+ 
+            if not self._valid_uuid(doctor_id):
+                return {"success": False, "errors": ["Invalid Doctor ID format"]}, 400
+ 
+            # Delete doctor if not assigned
+            result = self.doctor_repo.delete_doctor_if_unassigned(doctor_id)
+ 
+            if result["success"]:
+                return {"success": True, "message": "Doctor deleted successfully"}, 200
+ 
+            delete_status = result.get("delete_status")
+            if delete_status == "assigned":
+                return {"success": False, "errors": ["Doctor is assigned to a patient and cannot be deleted"]}, 400
+            elif delete_status == "not_found_or_failed":
+                return {"success": False, "errors": ["Failed to delete doctor"]}, 500
+            elif delete_status == "exception":
+                return {"success": False, "errors": [result.get("error", "Unknown error")]}, 500
+            else:
+                return {"success": False, "errors": ["Unexpected error occurred"]}, 500
+ 
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
