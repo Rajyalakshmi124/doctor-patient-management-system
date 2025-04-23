@@ -171,7 +171,6 @@ class DoctorService:
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
         
-        
     def get_assigned_doctors_by_patient(self, patient_id):
         try:
             # Validations.
@@ -219,5 +218,48 @@ class DoctorService:
             else:
                 return {"success": False, "errors": ["Unexpected error occurred"]}, 500
  
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+        
+    def update_doctor(self, doctor_id, data):
+        try:
+            # Validate doctor_id
+            if not doctor_id or not doctor_id.strip():
+                return {"success": False, "errors": ["Doctor ID is required"]}, 400
+
+            if not self._valid_uuid(doctor_id):
+                return {"success": False, "errors": ["Invalid Doctor ID format"]}, 400
+
+            # Extracting data from the request JSON
+            firstName = data.get('firstName')
+            lastName = data.get('lastName')
+            department = data.get('department')
+
+            # Validations
+            errors = []
+            if firstName and not all(char.isalpha() or char.isspace() for char in firstName.strip()):
+                errors.append("First name must contain only letters and spaces")
+            if lastName and not all(char.isalpha() or char.isspace() for char in lastName.strip()):
+                errors.append("Last name must contain only letters and spaces")
+            if department and any(char.isdigit() for char in department.strip()):
+                errors.append("Department name must contain only alphabets, spaces, and special symbols")
+
+            if errors:
+                return {"success": False, "errors": errors}, 400
+
+            # Ensure no additional fields are present in the input data
+            allowed_fields = ["firstName", "lastName", "department"]
+            if any(field not in allowed_fields for field in data.keys()):
+                return {"success": False, "errors": ["Only first name, last name, and department are allowed"]}, 400
+
+            # Call repository function to update doctor in the database
+            updated = self.doctor_repo.update_doctor(doctor_id, firstName, lastName, department)
+
+            if not updated:
+                return {"success": False, "errors": ["Doctor not found or no changes made"]}, 404
+
+            # Return success response
+            return {"success": True, "message": "Doctor updated successfully"}, 200
+
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500

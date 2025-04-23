@@ -48,9 +48,16 @@ class DoctorController:
         patient_id = request.args.get('patientId')
         response, status_code = doctor_service.get_assigned_doctors_by_patient(patient_id)
         return jsonify(response), status_code
-
+    
     @staticmethod
     @doctor_bp.route('/doctor/<doctor_id>', methods=['DELETE'])
     def delete_doctor(doctor_id):
         response, status_code = doctor_service.delete_doctor(doctor_id)
+        return jsonify(response), status_code
+
+    @staticmethod
+    @doctor_bp.route('/doctor/<doctor_id>', methods=['PATCH'])
+    def patch_doctor(doctor_id):
+        data = request.get_json()
+        response, status_code = doctor_service.update_doctor(doctor_id, data)
         return jsonify(response), status_code
