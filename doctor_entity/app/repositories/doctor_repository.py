@@ -155,4 +155,41 @@ class DoctorRepository:
         finally:
             cursor.close()
             connection.close()
-            
+
+    def update_doctor(self, doctor_id, firstName, lastName, department):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+
+            # Build the update query dynamically based on provided fields
+            update_fields = []
+            update_values = []
+
+            if firstName:
+                update_fields.append("firstName = %s")
+                update_values.append(firstName.strip())
+            if lastName:
+                update_fields.append("lastName = %s")
+                update_values.append(lastName.strip())
+            if department:
+                update_fields.append("department = %s")
+                update_values.append(department.strip())
+
+            if not update_fields:
+                return False
+
+            update_values.append(doctor_id)
+            query = f"UPDATE doctor SET {', '.join(update_fields)} WHERE id = %s"
+            cursor.execute(query, tuple(update_values))
+            connection.commit()
+
+            return cursor.rowcount > 0
+
+        except Exception as e:
+            print(f"Error updating doctor: {e}")
+            return False
+
+        finally:
+            cursor.close()
+            connection.close()
+       
