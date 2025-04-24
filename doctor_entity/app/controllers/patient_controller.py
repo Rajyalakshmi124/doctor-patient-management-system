@@ -129,6 +129,7 @@ class PatientController:
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
 
+
     # PATCH /patient/{patientId} - Update patient details
     @staticmethod
     @patient_bp.route('/patient/<patient_id>', methods=['PATCH'])

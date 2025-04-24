@@ -97,6 +97,22 @@ class PatientService:
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
 
+    def get_patients_by_doctor_id(self, doctor_id):
+        try:
+            # Validate UUID here if needed (already done in controller)
+            doctor, patients = self.patient_repo.get_patients_by_doctor_id(doctor_id)
+
+            if not doctor:
+                return {"success": False, "errors": ["Doctor has no assigned patients"]}, 404
+
+            return {
+                "success": True,
+                "doctor": doctor,
+                "patients": patients
+            }, 200
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+          
     def update_patient_by_id(self, patient_id, data):
         try:
             # Call the repository method to update patient details
@@ -105,6 +121,3 @@ class PatientService:
                 return {"success": False, "errors": ["Patient not found"]}
             
             return {"success": True, "message": "Patient details updated successfully."}, 200
-        
-        except Exception as e:
-            return {"success": False, "errors": [str(e)]}, 500
