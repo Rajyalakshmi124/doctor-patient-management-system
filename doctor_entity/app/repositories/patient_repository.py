@@ -130,3 +130,51 @@ class PatientRepository:
                 cursor.close()
             if 'connection' in locals() and connection:
                 connection.close()
+
+    def get_patients_by_doctor_id(self, doctor_id):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+
+            query = """
+            SELECT d.id, d.firstName, d.lastName, d.department, p.id, p.firstName, p.lastName, a.date_of_admission
+            FROM doctor d
+            JOIN doctorpatientassignment a ON d.id = a.doctor_id
+            JOIN patient p ON p.id = a.patient_id
+            WHERE d.id = %s AND a.is_unassigned = FALSE;
+            """
+            
+            cursor.execute(query, (doctor_id,))
+            results = cursor.fetchall()
+
+            if not results:
+                return None, []
+
+            # Extract doctor info
+            doctor = {
+                "id": results[0][0],
+                "firstName": results[0][1],
+                "lastName": results[0][2],
+                "department": results[0][3]
+            }
+            
+            # Create the patients list
+            patients = []
+            for patient in results:
+                patients.append({
+                    "id": patient[4],
+                    "firstName": patient[5],
+                    "lastName": patient[6],
+                    "dateOfAdmission": patient[7]
+                })
+
+            return doctor, patients
+
+        except Exception as e:
+            print(f"Error fetching patients by doctor ID: {e}")
+            return None, []
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
