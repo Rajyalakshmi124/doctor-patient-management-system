@@ -97,26 +97,84 @@ class PatientService:
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
 
+    def get_patients_by_doctor_id(self, doctor_id):
+        try:
+            # Validate UUID here if needed (already done in controller)
+            doctor, patients = self.patient_repo.get_patients_by_doctor_id(doctor_id)
+
+            if not doctor:
+                return {"success": False, "errors": ["Doctor has no assigned patients"]}, 404
+
+            return {
+                "success": True,
+                "doctor": doctor,
+                "patients": patients
+            }, 200
+        except Exception as e:
+            return {"success": False, "errors": [str(e)]}, 500
+
     def update_patient_by_id(self, patient_id, data):
         try:
-            # Call the repository method to update patient details
-            self.patient_repo.update_patient(patient_id, data)
-            if not patient_id:
-                return {"success": False, "errors": ["Patient not found"]}
+            # Validate patient_id
+            if not patient_id or not patient_id.strip():
+                return {"success": False, "errors": ["Patient ID is required"]}, 400
+
+            # Extract and strip first and last names from the input data
+            firstName = data.get('firstName', '').strip()
+            lastName = data.get('lastName', '').strip()
+
+            # Initialize an empty list to collect validation errors
+            errors = []
             
+            # Validate firstName
+            if 'firstName' in data:
+                firstName = data['firstName'].strip()
+                if not firstName:
+                    errors.append("First name is required")
+                elif not firstName.replace(' ', '').isalpha():
+                    errors.append("First name must contain only letters and spaces")
+
+            # Validate lastName
+            if 'lastName' in data:
+                lastName = data['lastName'].strip()
+                if not lastName:
+                    errors.append("Last name is required")
+                elif not lastName.replace(' ', '').isalpha():
+                    errors.append("Last name must contain only letters and spaces")
+
+            # Ensure no additional fields are present in the input data
+            allowed_fields = ['firstName', 'lastName']
+            if any(field not in allowed_fields for field in data.keys()):
+                return {"success": False, "errors": ["Only first name and last name are allowed"]}, 400
+
+            # If there are validation errors, return them with a 400 status code
+            if errors:
+                return {"success": False, "errors": errors}, 400
+
+            # Call the repository method to update patient details
+            update_result = self.patient_repo.update_patient(patient_id, data)
+            
+            if update_result is None:
+                return {"success": False, "errors": ["Patient not found"]}, 404
+            
+            if not update_result:
+                return {"success": False, "errors": ["Patient not found"]}, 404
+
             return {"success": True, "message": "Patient details updated successfully."}, 200
-        
+
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
 
     def delete_patient_by_id(self, patient_id):
         try:
-            # Call repository method - handles both check and deletion
-            self.patient_repo.delete_patient(patient_id)
-            if not patient_id:
-                return {"success": False, "errors": ["Patient not found"]}
+            result = self.patient_repo.delete_patient(patient_id)
+            
+            if result == "assigned":
+                return {"success": False, "errors": ["Patient is assigned to a doctor and cannot be deleted."]}, 400
+            elif result is None:
+                return {"success": False, "errors": ["Patient not found"]}, 404
             
             return {"success": True, "message": "Patient deleted successfully."}, 200
-        
+    
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500

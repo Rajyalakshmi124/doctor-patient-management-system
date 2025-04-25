@@ -155,4 +155,70 @@ class DoctorRepository:
         finally:
             cursor.close()
             connection.close()
-            
+
+    def delete_doctor_if_unassigned(self, doctor_id):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+ 
+            # Check if the doctor is assigned to any patients.
+            check_query = "SELECT COUNT(*) FROM doctorpatientassignment WHERE doctorId = %s"
+            cursor.execute(check_query, (doctor_id,))
+            count = cursor.fetchone()[0]
+
+            if count > 0:
+                return {"success": False, "delete_status": "assigned"}
+ 
+            # Delete is unassigned it it proceed with deletion.
+            delete_query = "DELETE FROM doctor WHERE id = %s"
+            cursor.execute(delete_query, (doctor_id,))
+            connection.commit()
+ 
+            if cursor.rowcount > 0:
+                return {"success": True}
+            else:
+                return {"success": False, "delete_status": "not_found_or_failed"}
+ 
+        except Exception as e:
+            print(f"Error deleting doctor: {e}")
+            return {"success": False, "delete_status": "exception", "error": str(e)}
+        finally:
+                cursor.close()
+                connection.close() 
+
+    def update_doctor(self, doctor_id, firstName, lastName, department):
+        try:
+            connection = self.db.connect()
+            cursor = connection.cursor()
+
+            # Build the update query dynamically based on provided fields
+            update_fields = []
+            update_values = []
+
+            if firstName:
+                update_fields.append("firstName = %s")
+                update_values.append(firstName.strip())
+            if lastName:
+                update_fields.append("lastName = %s")
+                update_values.append(lastName.strip())
+            if department:
+                update_fields.append("department = %s")
+                update_values.append(department.strip())
+
+            if not update_fields:
+                return False
+
+            update_values.append(doctor_id)
+            query = f"UPDATE doctor SET {', '.join(update_fields)} WHERE id = %s"
+            cursor.execute(query, tuple(update_values))
+            connection.commit()
+
+            return cursor.rowcount > 0
+
+        except Exception as e:
+            print(f"Error updating doctor: {e}")
+            return False
+
+        finally:
+            cursor.close()
+            connection.close()
