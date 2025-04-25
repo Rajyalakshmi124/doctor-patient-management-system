@@ -112,3 +112,12 @@ class PatientService:
             }, 200
         except Exception as e:
             return {"success": False, "errors": [str(e)]}, 500
+          
+    def update_patient_by_id(self, patient_id, data):
+        try:
+            # Call the repository method to update patient details
+            self.patient_repo.update_patient(patient_id, data)
+            if not patient_id:
+                return {"success": False, "errors": ["Patient not found"]}
+            
+            return {"success": True, "message": "Patient details updated successfully."}, 200

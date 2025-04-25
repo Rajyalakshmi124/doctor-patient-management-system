@@ -178,3 +178,40 @@ class PatientRepository:
                 cursor.close()
             if connection:
                 connection.close()
+                
+    def update_patient(self, patient_id, data):
+        connection = self.db.connect()
+        cursor = connection.cursor()
+        try:
+            # Check if the patient is assigned to a doctor
+            check_query = "SELECT doctor_id FROM doctorpatientassignment WHERE patient_id = %s"
+            cursor.execute(check_query, (patient_id,))
+            result = cursor.fetchone()
+
+            if result:
+                raise ValueError("Patient is assigned to a doctor and cannot be updated.")
+
+            # Dynamically build the update query based on the provided data
+            update_fields = []
+            update_values = []
+
+            if 'firstName' in data:
+                update_fields.append("first_name = %s")
+                update_values.append(data['firstName'].strip())
+            if 'lastName' in data:
+                update_fields.append("last_name = %s")
+                update_values.append(data['lastName'].strip())
+
+            if not update_fields:
+                raise ValueError("No valid fields to update")
+
+            update_fields_str = ", ".join(update_fields)
+            update_values.append(patient_id)
+
+            query = f"UPDATE patient SET {update_fields_str} WHERE id = %s"
+            cursor.execute(query, tuple(update_values))
+            connection.commit()
+
+            return True
+        except Exception as e:
+            raise e
