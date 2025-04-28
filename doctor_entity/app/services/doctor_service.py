@@ -235,18 +235,26 @@ class DoctorService:
             lastName = data.get('lastName')
             department = data.get('department')
 
-            # Validations
+            # Validations          
             errors = []
-            if firstName and not all(char.isalpha() or char.isspace() for char in firstName.strip()):
+            if not firstName:
+                errors.append("First name is required")
+            elif not all(char.isalpha() or char.isspace() for char in firstName.strip()):
                 errors.append("First name must contain only letters and spaces")
-            if lastName and not all(char.isalpha() or char.isspace() for char in lastName.strip()):
+ 
+            if not lastName:
+                errors.append("Last name is required")
+            elif not all(char.isalpha() or char.isspace() for char in lastName.strip()):
                 errors.append("Last name must contain only letters and spaces")
-            if department and any(char.isdigit() for char in department.strip()):
+ 
+            if not department:
+                errors.append("Department is required")
+            elif any(char.isdigit() for char in department.strip()):
                 errors.append("Department name must contain only alphabets, spaces, and special symbols")
-
+ 
             if errors:
                 return {"success": False, "errors": errors}, 400
-
+ 
             # Ensure no additional fields are present in the input data
             allowed_fields = ["firstName", "lastName", "department"]
             if any(field not in allowed_fields for field in data.keys()):
