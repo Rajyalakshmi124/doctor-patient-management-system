@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from app.services.patient_services import PatientService
 from app.services.doctor_service import DoctorService
+from app.services.patient_services import PatientService
 
 # Create a Blueprint for patient routes
 patient_bp = Blueprint('patient', __name__) 
@@ -72,7 +72,7 @@ class PatientController:
 
 
     @staticmethod
-    @patient_bp.route('/patient/UnAssignDoctorFromPatient', methods=['POST'])
+    @patient_bp.route('/UnAssignDoctorFromPatient', methods=['POST'])
     def unassign_doctor_from_patient():
         try:
             # Get data from request
@@ -129,25 +129,50 @@ class PatientController:
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500
 
-
     # PATCH /patient/{patientId} - Update patient details
     @staticmethod
     @patient_bp.route('/patient/<patient_id>', methods=['PATCH'])
     def update_patient(patient_id):
-        # Handles updating patient details.
         try:
+            patient_id=patient_id.strip()
+            # Validate patient_id
+            if not patient_id:
+                return jsonify({"success": False, "errors": ["Patient ID is required"]}), 400
+            
             # Validate patient_id format
             if not doctor_service._valid_uuid(patient_id):
-                return{"success":False, "error":["Invalid Patient ID format"]}, 400
- 
+                return jsonify({"success": False, "errors": ["Invalid Patient ID format"]}), 400
+    
             # Get data from request
             data = request.get_json()
- 
             if not data:
                 return jsonify({"success": False, "errors": ["Request body must be JSON."]}), 400
- 
+    
             # Call service method to update patient details
             response, status_code = patient_service.update_patient_by_id(patient_id, data)
             return jsonify(response), status_code
+    
+        except Exception as e:
+            return jsonify({"success": False, "errors": [str(e)]}), 500
+
+    # DELETE /patient/{patientId} - Delete patient
+    @staticmethod
+    @patient_bp.route('/patient/<patient_id>', methods=['DELETE'])
+    def delete_patient(patient_id):
+        # Handles deleting a patient.
+        try:
+            patient_id=patient_id.strip()
+            # Validate patient_id
+            if not patient_id:
+                return jsonify({"success": False, "errors": ["Patient ID is required"]}), 400
+            
+            # Validate patient_id format
+            if not doctor_service._valid_uuid(patient_id):
+                return{"success":False, "error":["Invalid Patient ID format"]}, 400
+    
+            # Call service method to check and delete the patient
+            response, status_code = patient_service.delete_patient_by_id(patient_id)
+            return jsonify(response), status_code
+    
         except Exception as e:
             return jsonify({"success": False, "errors": [str(e)]}), 500

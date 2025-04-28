@@ -178,28 +178,33 @@ class PatientRepository:
                 cursor.close()
             if connection:
                 connection.close()
-                
+    
     def update_patient(self, patient_id, data):
         connection = self.db.connect()
         cursor = connection.cursor()
         try:
+            # Check if patient exists
+            cursor.execute("SELECT id FROM patient WHERE id = %s", (patient_id,))
+            if not cursor.fetchone():
+                return None
+
             # Check if the patient is assigned to a doctor
             check_query = "SELECT doctor_id FROM doctorpatientassignment WHERE patient_id = %s"
             cursor.execute(check_query, (patient_id,))
             result = cursor.fetchone()
-
             if result:
                 raise ValueError("Patient is assigned to a doctor and cannot be updated.")
 
-            # Dynamically build the update query based on the provided data
+            # Prepare update query
             update_fields = []
             update_values = []
 
             if 'firstName' in data:
-                update_fields.append("first_name = %s")
+                update_fields.append("firstName = %s")
                 update_values.append(data['firstName'].strip())
+
             if 'lastName' in data:
-                update_fields.append("last_name = %s")
+                update_fields.append("lastName = %s")
                 update_values.append(data['lastName'].strip())
 
             if not update_fields:
@@ -207,11 +212,49 @@ class PatientRepository:
 
             update_fields_str = ", ".join(update_fields)
             update_values.append(patient_id)
-
             query = f"UPDATE patient SET {update_fields_str} WHERE id = %s"
             cursor.execute(query, tuple(update_values))
             connection.commit()
 
             return True
+
         except Exception as e:
             raise e
+
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+
+    def delete_patient(self, patient_id):
+        connection = self.db.connect()
+        cursor = connection.cursor()
+        try:
+            # Check if the patient is assigned to a doctor
+            check_query = """
+            SELECT * FROM doctorpatientassignment 
+            WHERE patient_id = %s AND is_unassigned = FALSE
+            """
+            cursor.execute(check_query, (patient_id,))
+            assignment = cursor.fetchone()
+            
+            if assignment:
+                # Patient is assigned – do not delete
+                return "assigned"
+    
+            # Proceed with deletion
+            delete_query = "DELETE FROM patient WHERE id = %s"
+            cursor.execute(delete_query, (patient_id,))
+            connection.commit()
+            
+            if cursor.rowcount == 0:
+                # Patient not found
+                return None  
+            # Deleted successfully
+            return True  
+        except Exception as e:
+            raise e
+        finally:
+            if cursor: cursor.close()
+            if connection: connection.close()
