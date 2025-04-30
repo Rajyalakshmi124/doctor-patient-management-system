@@ -39,7 +39,7 @@ class PatientController:
             
             # Validate if the patient_id is a valid UUID
             if not doctor_service._valid_uuid(patient_id):
-                return{"success":False, "error":["Invalid Patient ID format"]}, 400
+                return{"success":False, "errors":["Invalid Patient ID format"]}, 400
 
             response = patient_service.get_patient_by_id(patient_id)
             status_code = 200 if response["success"] else 404
