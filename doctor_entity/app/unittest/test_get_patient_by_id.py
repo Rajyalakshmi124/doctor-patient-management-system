@@ -1,28 +1,41 @@
 import unittest
 import json
+from unittest.mock import patch
 from main import app
-
-class TestGetPatientByIdAPI(unittest.TestCase):
-    # Inherits from unittest.TestCase to access built-in testing features
-
+ 
+# Constants
+PATIENT_ID = "fcfd3827-a3e5-4c86-bbb5-ab660fea0eb3"
+FIRSTNAME = "John"
+LASTNAME = "Doe"
+ 
+class TestGetPatientByIdAPI(unittest.TestCase):  
+    # Inherits from unittest.TestCase for test features
     def setUp(self):
         # Set up test client to simulate API requests
         self.client = app.test_client()
         self.headers = {'Content-Type': 'application/json'}
-
+ 
     # Test Case 1: Successfully fetching a patient by ID
-    def test_get_patient_success(self):
-        # Act: Fetch the patient using GET with a known valid ID
-        patient_id = "fcfd3827-a3e5-4c86-bbb5-ab660fea0eb2"  
-        get_response = self.client.get(f"/patient/{patient_id}", headers=self.headers)
-
-        # Assert: Check the fetched data is correct
-        self.assertEqual(get_response.status_code, 200)
-        get_data = json.loads(get_response.data)
-        self.assertTrue(get_data["success"])
-        self.assertEqual(get_data["firstName"], "John")
-        self.assertEqual(get_data["lastName"], "Doe")
-        self.assertEqual(get_data["id"], patient_id)
+    @patch('app.services.patient_services.PatientService.get_patient_by_id')
+    def test_get_patient_success(self, mock_get):
+        # Arrange: mock only the dictionary, no status code tuple
+        mock_get.return_value = {
+            "success": True,
+            "id": PATIENT_ID,
+            "firstName": FIRSTNAME,
+            "lastName": LASTNAME
+        }
+    
+        # Act
+        response = self.client.get(f"/patient/{PATIENT_ID}", headers=self.headers)
+    
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data["success"])
+        self.assertEqual(data["id"], PATIENT_ID)
+        self.assertEqual(data["firstName"], FIRSTNAME)
+        self.assertEqual(data["lastName"], LASTNAME)
 
     # Test Case 2: Fetching a patient with invalid ID format
     def test_get_patient_invalid_id_format(self):
@@ -56,6 +69,13 @@ class TestGetPatientByIdAPI(unittest.TestCase):
         data = json.loads(response.data)
         self.assertFalse(data["success"])
         self.assertIn("Patient ID is required", data["errors"])
+
+    # Test Case 5: Giving an invalid URL path
+    def test_get_patient_invalid_path(self):
+        response = self.client.get(f"/pat", headers=self.headers)
+
+        # Assert: Should return 404 Not Found
+        self.assertEqual(response.status_code, 404)
 
 # Run the tests
 if __name__ == '__main__':
