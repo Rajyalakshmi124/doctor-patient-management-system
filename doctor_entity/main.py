@@ -9,5 +9,5 @@ app.json.sort_keys = False
 app.register_blueprint(doctor_bp)
 app.register_blueprint(patient_bp)
   
-if __name__ == "__main__": 
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True,host='0.0.0.0', port=8000)

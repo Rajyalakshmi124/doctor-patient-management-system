@@ -6,6 +6,7 @@ from main import app
 FIRSTNAME = "Robert"
 LASTNAME = "Miller"
 DEPARTMENT = "Dermatology"
+UUID = "d3a85b22-26b7-40e8-938c-b237eb298cda"
 
 @pytest.fixture
 def client():
@@ -23,10 +24,10 @@ def test_post_doctor(client):
 
     mock_response = {
         "success": True,
-        "id": "d3a85b22-26b7-40e8-938c-b237eb298cda",
-        "firstName": "Robert",
-        "lastName": "Miller",
-        "department": "Dermatology"
+        "id": UUID,
+        "firstName": FIRSTNAME,
+        "lastName": LASTNAME,
+        "department": DEPARTMENT
     }
 
     with patch("app.services.doctor_service.DoctorService.create_doctor", return_value=(mock_response, 200)):

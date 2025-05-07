@@ -1,4 +1,5 @@
 import pytest
+from testing.test_doctor_api import FIRSTNAME, LASTNAME, DEPARTMENT, UUID
 from unittest.mock import patch
 from main import app
 
@@ -12,10 +13,10 @@ def client():
 def test_get_doctor_success(client):
     mock_response = {
         "success": True,
-        "id": "d3a85b22-26b7-40e8-938c-b237eb298cdb",
-        "firstName": "John",
-        "lastName": "Doe",
-        "department": "Cardiology"
+        "id": UUID,
+        "firstName": FIRSTNAME,
+        "lastName": LASTNAME,
+        "department": DEPARTMENT
     }
  
     with patch("app.services.doctor_service.DoctorService.get_doctor_details", return_value=(mock_response, 200)):
