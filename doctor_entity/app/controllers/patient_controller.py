@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.doctor_service import DoctorService
 from app.services.patient_services import PatientService
+from app.auth import login_required
 
 # Create a Blueprint for patient routes
 patient_bp = Blueprint('patient', __name__) 
@@ -14,6 +15,7 @@ class PatientController:
     # class for handling patient related API request
     @staticmethod
     @patient_bp.route('/patient', methods=['POST'])
+    @login_required
     def post_patient():
         """Handles the creation of a new patient."""
         try:
@@ -30,6 +32,7 @@ class PatientController:
 
     @staticmethod
     @patient_bp.route('/patient/<patient_id>', methods=['GET'])
+    @login_required
     def get_patient(patient_id):
         # Handles fetching a patient by their ID.
         try:
@@ -52,6 +55,7 @@ class PatientController:
 
     @staticmethod
     @patient_bp.route('/patient', methods=['GET'])
+    @login_required
     def get_patient_by_name():
         # Handles fetching patients by their name (first name or full name).
         try:
@@ -73,6 +77,7 @@ class PatientController:
 
     @staticmethod
     @patient_bp.route('/UnAssignDoctorFromPatient', methods=['POST'])
+    @login_required
     def unassign_doctor_from_patient():
         try:
             # Get data from request
@@ -114,6 +119,7 @@ class PatientController:
     
     @staticmethod
     @patient_bp.route('/patientsByDoctorId', methods=['GET'])
+    @login_required
     def get_patients_by_doctor_id():
         try:
             doctor_id = request.args.get('doctorId', '').strip()
@@ -132,6 +138,7 @@ class PatientController:
     # PATCH /patient/{patientId} - Update patient details
     @staticmethod
     @patient_bp.route('/patient/<patient_id>', methods=['PATCH'])
+    @login_required
     def update_patient(patient_id):
         try:
             patient_id=patient_id.strip()
@@ -158,6 +165,7 @@ class PatientController:
     # DELETE /patient/{patientId} - Delete patient
     @staticmethod
     @patient_bp.route('/patient/<patient_id>', methods=['DELETE'])
+    @login_required
     def delete_patient(patient_id):
         # Handles deleting a patient.
         try:
