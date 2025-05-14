@@ -4,12 +4,8 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: trainingPoc
-      DB_PORT: 3306
+    env_file:
+      - .env
     depends_on:
       - db
 
