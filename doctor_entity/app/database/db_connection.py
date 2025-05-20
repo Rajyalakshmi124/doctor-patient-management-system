@@ -1,13 +1,14 @@
 import pymysql
+import os
  
 class Database:
     def __init__(self):
         self.connection = None
         self.db_config = {
-            "host": "localhost",
-            "user": "root",
-            "password": "root",
-            "database": "trainingPoc"
+            "host": os.getenv("DB_HOST","localhost"),
+            "user": os.getenv("DB_USER","root"),
+            "password": os.getenv("DB_PASSWORD","root"),
+            "database": os.getenv("DB_NAME","trainingPoc")
         }
  
     #Establish a database connection.
