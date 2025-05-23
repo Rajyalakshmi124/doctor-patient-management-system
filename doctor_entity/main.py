@@ -1,16 +1,17 @@
-import os
+import os, secrets
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from app.controllers.auth_controller import auth_bp
 from app.controllers.doctor_controller import doctor_bp
 from app.controllers.patient_controller import patient_bp
-from app.controllers.auth_controller import auth_bp
+
 
 # Initialize the flask application
 app = Flask(__name__) 
 app.json.sort_keys = False
 
 # JWT Configuration using secret key from environment
-app.config['JWT_SECRET_KEY'] = os.environ.get("JWT_SECRET_KEY")
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY") or secrets.token_urlsafe(16)
 jwt = JWTManager(app)
 print("jwt key:", app.config['JWT_SECRET_KEY'])
 
